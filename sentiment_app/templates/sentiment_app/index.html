@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Detector de Sentimientos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3f3f3;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    .container {
+      width: 90%;
+      max-width: 800px;
+      margin: 50px auto;
+      background-color: #fff;
+      padding: 30px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      opacity: 0;
+      animation: fadeIn 1s forwards;
+      animation-delay: 0.5s;
+      min-height: 300px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      font-family: 'Poppins', sans-serif;
+      font-size: 2.5em;
+      transform: translateY(20px);
+      opacity: 0;
+      animation: titleSlide 1s forwards;
+      margin-bottom: 30px;
+    }
+    .form-container {
+      transform: translateY(100%);
+      opacity: 0;
+      animation: slideUp 1s forwards;
+      animation-delay: 4s;
+    }
+    .input-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+    textarea {
+      flex: 1;
+      padding: 15px;
+      margin: 0;
+      border: 1px solid #ccc;
+      border-radius: 25px;
+      font-size: 16px;
+      resize: vertical;
+      min-height: 50px;
+      max-height: 200px;
+      transition: all 0.3s ease;
+    }
+    .search-btn {
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      padding: 15px;
+      border-radius: 50%;
+      cursor: pointer;
+      width: 80px;
+      height: 80px;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .search-btn:hover {
+      background-color: #0056b3;
+      transform: scale(1.1);
+    }
+    .search-btn svg {
+      width: 40px;
+      height: 40px;
+      fill: white;
+    }
+    .resultado {
+      margin-top: -1px;
+      width: calc(100% - 100px);
+      background: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
+      border-radius: 0 0 25px 25px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      max-height: 0;
+      opacity: 0;
+      transform-origin: top;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    .resultado.active {
+      max-height: 500px;
+      opacity: 1;
+      padding: 20px 15px;
+    }
+    .input-wrapper {
+      position: relative;
+      margin: 20px 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .resultado-wrapper {
+      display: flex;
+      align-items: flex-start;
+    }
+    .resultado-spacer {
+      width: 90px;
+      flex-shrink: 0;
+    }
+    .resultado-content {
+      text-align: justify;
+      margin: 10px 0;
+      line-height: 1.6;
+    }
+    @keyframes titleSlide {
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes slideUp {
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>¿Quieres predecir un tweet en positivo o negativo?</h1>
+    <div class="form-container">
+      <form action="{% url 'predecir' %}" method="post" id="sentimentForm">
+        {% csrf_token %}
+        <div class="input-wrapper">
+          <div class="input-group">
+            <textarea name="texto" id="texto-input" rows="1" placeholder="Escribe tu texto aquí..." required></textarea>
+            <button type="submit" class="search-btn">
+              <svg viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="resultado-wrapper">
+            <div class="resultado {% if resultado %}active{% endif %}" id="resultado-container">
+              {% if resultado %}
+                <div class="resultado-content">
+                  <h2>Resultado: {{ resultado }}</h2>
+                  <p>Texto analizado: "{{ texto }}"</p>
+                  <p>Estimaciones: "{{ res2 }}"</p>
+                </div>
+              {% endif %}
+            </div>
+            <div class="resultado-spacer"></div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('sentimentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const resultDiv = form.querySelector('.resultado');
+      
+      // Animación de carga
+      resultDiv.classList.remove('active');
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form)
+        });
+        
+        const newContent = await response.text();
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = newContent;
+        
+        // Actualizar solo el resultado
+        const newResult = tempDiv.querySelector('.resultado');
+        resultDiv.innerHTML = newResult.innerHTML;
+        
+        // Activar animación
+        resultDiv.classList.add('active');
+        form.querySelector('textarea').style.height = 'auto';
+        
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+
+    // Mantener animación después de recarga
+    window.addEventListener('load', () => {
+      if(document.querySelector('.resultado.active')) {
+        const resultDiv = document.querySelector('.resultado');
+        resultDiv.style.display = 'block';
+        resultDiv.classList.add('active');
+      }
+    });
+
+    // Ajustar altura del textarea automáticamente
+    const textareaInput = document.getElementById('texto-input');
+    textareaInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = this.scrollHeight + 'px';
+      
+      // Ocultar el resultado si el campo está vacío
+      const resultadoContainer = document.getElementById('resultado-container');
+      if (this.value.trim() === '') {
+        resultadoContainer.classList.remove('active');
+        // Vaciar contenido después de la animación
+        setTimeout(() => {
+          if (this.value.trim() === '') {
+            resultadoContainer.innerHTML = '';
+          }
+        }, 400); // Duración de la animación
+      }
+    });
+
+    // Manejar la tecla Escape para borrar el input y ocultar resultados
+    textareaInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        this.value = '';
+        document.getElementById('resultado-container').classList.remove('active');
+        this.style.height = 'auto';
+      }
+    });
+  </script>
+</body>
+</html>
