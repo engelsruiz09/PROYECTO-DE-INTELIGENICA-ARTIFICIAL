@@ -4,8 +4,9 @@
 #   - Recursividad
 #   - Builder pattern
 
-import numpy as np  # <- Añadir esta línea
+import numpy as np 
 import math
+import re, string 
 from collections import defaultdict, Counter
 
 # ------------------------- Función para K-Fold Estratificado -----------------
@@ -248,3 +249,162 @@ class RecNaiveBayes:
         # Almacenar en memo y retornar suma acumulada
         memo[key] = log_prob + log_rest
         return memo[key]
+
+# 4.1 ) Limpieza / Preprocesamiento
+#    Funcion para limpiar texto de palabras raras: quitar URL, stopwords, etc.
+stop = set("""a about above after again against all am an and any are aren't as
+at be because been before being below between both but by can't cannot could
+couldn't did didn't do does doesn't doing don't down during each few for from
+further had hadn't has hasn't have haven't having he he'd he'll he's her here
+here's hers herself him himself his how how's i i'd i'll i'm i've if in into is
+isn't it it's its itself let's me more most mustn't my myself no nor not of off
+on once only or other ought our ours ourselves out over own same shan't she
+she'd she'll she's should shouldn't so some such than that that's the their
+theirs them themselves then there there's these they they'd they'll they're
+they've this those through to too under until up very was wasn't we we'd we'll
+we're we've were weren't what what's when when's where where's which while who
+who's whom why why's with won't would wouldn't you you'd you'll you're you've
+your yours yourself yourselves""".split())
+
+# Palabras importantes para análisis de sentimientos - NO filtrar estas
+sentiment_words = set([
+    # Palabras positivas
+    'happy', 'love', 'great', 'good', 'nice', 'best', 'better', 'awesome',
+    'amazing', 'excellent', 'fantastic', 'wonderful', 'enjoy', 'thanks', 'thank',
+    'beautiful', 'perfect', 'fun', 'exciting', 'excited', 'cool', 'liked',
+
+    # Palabras negativas
+    'sad', 'hate', 'bad', 'worst', 'worse', 'terrible', 'awful', 'horrible',
+    'disappointed', 'upset', 'annoyed', 'angry', 'mad', 'poor', 'sorry',
+    'boring', 'failed', 'fail', 'sucks', 'suck', 'disappointing', 'broken',
+
+    # Negaciones y modificadores (muy importantes para el sentimiento)
+    'not', 'no', 'never', "n't", 'cannot', 'cant', 'wont', 'very', 'really', 'too',
+    'extremely', 'totally', 'absolutely', 'completely', 'definitely'
+])
+
+# Lista final de stopwords (eliminamos palabras de sentimiento de las stopwords)
+final_stopwords = stop - sentiment_words
+
+def improved_clean_text(text):
+    """Función mejorada para limpiar texto preservando elementos importantes para el sentimiento"""
+    # Convertir a minúsculas
+    text = text.lower()
+
+    # Patrones para reconocer elementos especiales
+    url_pattern = re.compile(r'https?://\S+|www\.\S+')
+    mention_pattern = re.compile(r'@\w+')
+    hashtag_pattern = re.compile(r'#(\w+)')
+    emoji_pattern = re.compile(r'[:;=8][\-o\*\']?[\)\]dDpP/:\}\{@\|\\]|[\)\]dDpP/:\}\{@\|\\][\-o\*\']?[:;=8]')
+
+    # Reemplazar patrones con tokens especiales que aportan información
+    text = url_pattern.sub(' URL ', text)
+    text = mention_pattern.sub(' USER ', text)
+    text = hashtag_pattern.sub(r' HASHTAG_\1 ', text)  # Preservamos el contenido del hashtag
+
+    # Convertir emojis a tokens especiales
+    happy_emojis = [':)', ':-)', ':D', '=)', ':]', ':}', '=]', '=}', ':-))', ':))']
+    sad_emojis = [':(', ':-(', ':[', ':{', '=(', '=[', '={', ':((', ':-((',]
+
+    for emoji in happy_emojis:
+        if emoji in text:
+            text = text.replace(emoji, ' HAPPY_EMOJI ')
+
+    for emoji in sad_emojis:
+        if emoji in text:
+            text = text.replace(emoji, ' SAD_EMOJI ')
+
+    # Otras conversiones de texto a tokens semánticos
+    text = text.replace('!!!', ' STRONG_EMOTION ')
+    text = text.replace('!!', ' EMOTION ')
+    text = text.replace('!', ' EXCL ')
+
+    text = text.replace('???', ' STRONG_QUESTION ')
+    text = text.replace('??', ' QUESTION ')
+    text = text.replace('?', ' QUEST ')
+
+    # Preservar contracciones importantes (no -> n't)
+    text = text.replace("n't ", " not ")
+
+    # Eliminar puntuación (excepto algunas que ya procesamos)
+    for char in string.punctuation:
+        if char not in ['!', '?']:  # Estos ya los procesamos
+            text = text.replace(char, ' ')
+
+    # Normalizar espacios
+    text = re.sub(r'\s+', ' ', text).strip()
+
+    return text
+
+def extract_sentiment_features(text):
+    """Extrae características adicionales útiles para análisis de sentimientos"""
+    features = {}
+
+    # Contar signos de exclamación e interrogación (ya convertidos en tokens)
+    features['has_exclamation'] = 'EXCL' in text or 'EMOTION' in text or 'STRONG_EMOTION' in text
+    features['has_question'] = 'QUEST' in text or 'QUESTION' in text or 'STRONG_QUESTION' in text
+
+    # Detectar emojis
+    features['has_happy_emoji'] = 'HAPPY_EMOJI' in text
+    features['has_sad_emoji'] = 'SAD_EMOJI' in text
+
+    # Contar palabras en mayúsculas (énfasis)
+    original_words = text.split()
+    uppercase_words = sum(1 for word in original_words if word.isupper() and len(word) > 1)
+    features['has_uppercase'] = uppercase_words > 0
+
+    # Detectar negaciones
+    features['has_negation'] = any(neg in text.split() for neg in ['not', 'no', 'never', 'cannot'])
+
+    return features
+
+def improved_tokenize(text, features):
+    """Tokeniza texto y genera características mejoradas"""
+    # Tokenización básica
+    words = text.split()
+
+    # Filtrar stopwords pero preservar palabras de sentimiento
+    filtered_words = [word for word in words if word not in final_stopwords or word in sentiment_words]
+
+    # Tokens base
+    tokens = filtered_words
+
+    # Añadir tokens especiales basados en características
+    if features['has_exclamation']:
+        tokens.append('FEATURE_EXCLAMATION')
+
+    if features['has_question']:
+        tokens.append('FEATURE_QUESTION')
+
+    if features['has_happy_emoji']:
+        tokens.append('FEATURE_HAPPY_EMOJI')
+
+    if features['has_sad_emoji']:
+        tokens.append('FEATURE_SAD_EMOJI')
+
+    if features['has_uppercase']:
+        tokens.append('FEATURE_HAS_UPPERCASE')
+
+    if features['has_negation']:
+        tokens.append('FEATURE_NEGATION')
+
+    # Generar bigramas para capturar pares importantes
+    bigrams = []
+    if len(filtered_words) > 1:
+        for i in range(len(filtered_words) - 1):
+            # Si hay una negación seguida de una palabra de sentimiento
+            if filtered_words[i] in ['not', 'no', 'never'] and filtered_words[i+1] in sentiment_words:
+                bigrams.append(f"NEG_{filtered_words[i]}_{filtered_words[i+1]}")
+            # O simplemente un bigrama normal
+            else:
+                bigrams.append(f"{filtered_words[i]}_{filtered_words[i+1]}")
+
+    # Combinar todos los tokens
+    all_tokens = tokens + bigrams
+
+    return all_tokens
+
+def preprocess_to_tokens(raw_text:str):
+    clean = improved_clean_text(raw_text)
+    feats = extract_sentiment_features(clean)
+    return improved_tokenize(clean, feats)          # lista de tokens 
