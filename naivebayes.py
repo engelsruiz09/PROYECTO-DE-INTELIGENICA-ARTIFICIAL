@@ -207,6 +207,45 @@ def preprocess_to_tokens(raw_text:str):
     return improved_tokenize(clean, feats)          # lista de tokens 
 
 
+# Función para crear y mostrar matriz de confusión
+def create_confusion_matrix(y_true, y_pred):
+    # Obtener clases únicas
+    classes = sorted(list(set(y_true)))
+    n_classes = len(classes)
+
+    # Inicializar matriz de confusión con ceros
+    cm = np.zeros((n_classes, n_classes), dtype=int)
+
+    # Mapear clases a índices
+    class_to_idx = {cls: i for i, cls in enumerate(classes)}
+
+    # Llenar la matriz de confusión
+    for true, pred in zip(y_true, y_pred):
+        true_idx = class_to_idx[true]
+        pred_idx = class_to_idx[pred]
+        cm[true_idx, pred_idx] += 1
+
+    # Imprimir la matriz de confusión
+    print("\nMatriz de Confusión:")
+    print("-------------------")
+
+    # Imprimir encabezados de columnas
+    print("        ", end="")
+    for cls in classes:
+        print(f"{cls:>8}", end="")
+    print("\n        ", end="")
+    for _ in classes:
+        print(f"--------", end="")
+    print()
+
+    # Imprimir filas con etiquetas
+    for i, cls in enumerate(classes):
+        print(f"{cls:>8}", end="")
+        for j in range(n_classes):
+            print(f"{cm[i,j]:>8}", end="")
+        print()
+
+    return cm
 
 
 # ------------------------- Clase RecNBBuilder  -----------------
