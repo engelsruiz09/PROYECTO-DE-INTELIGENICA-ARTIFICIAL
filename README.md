@@ -124,14 +124,14 @@ Visita http://127.0.0.1:8000/, escribe un texto y pulsa Analizar.
 
 | Nº | Archivo | Descripción |
 |----|---------|-------------|
-| 1 | FOTOSREADME/overview.png | Diagrama general |
-| 2 | FOTOSREADME/KFOLDYMATRIZ.png | Resultados K‑Fold y Matriz de Confusion en Colab |
-| 3 | FOTOSREADME/foto1.png | Terminal con runserver |
-| 4 | FOTOSREADME/POSITIVE | Interfaz web con resultado Positivo|
-| 5 | FOTOSREADME/NEGATIVE | Interfaz web con resultado Negativo|
+| 1 | (FOTOSREADME/overview.png) | Diagrama general |
+| 2 | (FOTOSREADME/KFOLDYMATRIZ.png) | Resultados K‑Fold y Matriz de Confusion en Colab |
+| 3 | (FOTOSREADME/foto1.png) | Terminal con runserver |
+| 4 | (FOTOSREADME/POSITIVE) | Interfaz web con resultado Positivo|
+| 5 | (FOTOSREADME/NEGATIVE) | Interfaz web con resultado Negativo|
 
 ## Créditos
 
-- Autores: <JULIO ANTHONY ENGELS RUIZ COTO , CARNET No. 1284719>, <CESAR ADRIAN SILVA PEREZ , CARNET No. 1184519>, <EDDIE ALEJANDRO GIRON CARRANZA, CARNET No. 1307419>
+- Autores: JULIO ANTHONY ENGELS RUIZ COTO , CARNET No. 1284719, CESAR ADRIAN SILVA PEREZ , CARNET No. 1184519, EDDIE ALEJANDRO GIRON CARRANZA, CARNET No. 1307419
 - Dataset: Sentiment140 © Go, Hu, Kamath (Kaggle)
 - Licencia: MIT
