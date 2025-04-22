@@ -15,6 +15,7 @@
 6. [Tecnologías empleadas](#tecnologías-empleadas)
 7. [Capturas de pantalla](#capturas-de-pantalla)
 8. [Créditos](#créditos)
+9. [Link](#Link-Video-Presentacion)
 
 ---
 
@@ -27,7 +28,25 @@ Proyecto académico que **clasifica tuits en positivo o negativo** usando un **N
 3. **Backend Django** que carga el modelo y ofrece `/predecir/`.
 4. **Frontend HTML/CSS/JS** para introducir texto y ver la predicción.
 
-![Visión general](FOTOSREADME/overview.png)
+---
+
+## Sentiment140 dataset with 1.6 million tweets
+
+Este repositorio muestra cómo descargar y preparar el dataset **Sentiment140**, que contiene 1.6 millones de tweets etiquetados para análisis de sentimiento.
+
+---
+
+## Dataset
+
+- Kaggle: [Sentiment140](https://www.kaggle.com/datasets/kazanova/sentiment140)
+
+---
+
+## 1. Configurar la API de Kaggle
+
+1. Ve a tu cuenta de Kaggle → **Account** → **API** → **Create New API Token**.  
+2. Se descargará un archivo `kaggle.json`. Súbelo a tu Google Drive si utilizas Google Colaboratory   
+
 
 ---
 
@@ -124,7 +143,7 @@ Visita http://127.0.0.1:8000/, escribe un texto y pulsa Analizar.
 
 | Nº | Captura | Descripción                                   |
 |----|---------|-----------------------------------------------|
-| 1  | ![overview](FOTOSREADME/overview.png) | Diagrama general |
+| 1  | ![diagramageneral](FOTOSREADME/DIAGRAMAGENERAL.png) | Diagrama general |
 | 2  | ![k‑fold](FOTOSREADME/KFOLDYMATRIZ.png) | Resultados K‑Fold + matriz de confusión |
 | 3  | ![runserver](FOTOSREADME/foto1.png) | Terminal con runserver |
 | 4  | ![positivo](FOTOSREADME/POSITIVE.png) | Interfaz web – resultado Positivo |
@@ -136,3 +155,10 @@ Visita http://127.0.0.1:8000/, escribe un texto y pulsa Analizar.
 - Autores: JULIO ANTHONY ENGELS RUIZ COTO , CARNET No. 1284719, CESAR ADRIAN SILVA PEREZ , CARNET No. 1184519, EDDIE ALEJANDRO GIRON CARRANZA, CARNET No. 1307419
 - Dataset: Sentiment140 © Go, Hu, Kamath (Kaggle)
 - Licencia: MIT
+
+---
+
+## Link Video Presentacion
+
+- video: [video](https://drive.google.com/drive/folders/1sNoE91ZEu9BtpU1cNm25A0QFJMwBBUto?usp=sharing)
+
