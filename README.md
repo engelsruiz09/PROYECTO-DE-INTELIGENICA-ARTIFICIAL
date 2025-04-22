@@ -143,7 +143,7 @@ Visita http://127.0.0.1:8000/, escribe un texto y pulsa Analizar.
 
 | Nº | Captura | Descripción                                   |
 |----|---------|-----------------------------------------------|
-| 1  | ![diagramageneral](FOTOSREADME/DIAGRAMAGENERAL.png) | Diagrama general |
+| 1  | ![diagramageneral](FOTOSREADME/DIAGRAMAGENERAL.jpeg) | Diagrama general |
 | 2  | ![k‑fold](FOTOSREADME/KFOLDYMATRIZ.png) | Resultados K‑Fold + matriz de confusión |
 | 3  | ![runserver](FOTOSREADME/foto1.png) | Terminal con runserver |
 | 4  | ![positivo](FOTOSREADME/POSITIVE.png) | Interfaz web – resultado Positivo |
